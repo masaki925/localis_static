@@ -17,42 +17,82 @@
     <script type="text/javascript">
       $(function() {
           // Also works with: var yourStartLatLng = '59.3426606750, 18.0736160278';
-          var yourStartLatLng = new google.maps.LatLng(59.3426606750, 18.0736160278);
-          $('#map_canvas').gmap({'center': yourStartLatLng});
+          //var yourStartLatLng = new google.maps.LatLng(59.3426606750, 18.0736160278);
+          //$('#map_canvas').gmap({'center': yourStartLatLng});
+
+          $('#map_canvas').gmap('autocomplete', 'locality', function(ui) {
+                  // ui.item.position <-- selected position (google.maps.LatLng)
+          });
 
         ( function($) {
-                $.extend($.ui.gmap.prototype, {
-
-                        // We override the addMarker method
-                        addMarker: function(markerOptions, callback) {
-                                var marker = new MarkerWithLabel( jQuery.extend({'map': this.get('map'), 'bounds': false}, markerOptions) );
-                                var markers = this.get('markers');
-                                if ( marker.id ) {
-                                        markers[marker.id] = marker;
-                                } else {
-                                        markers.push(marker);
-                                }
-                                if ( marker.bounds ) {
-                                        this.addBounds(marker.getPosition());
-                                }
-                                this._call(callback, this.get('map'), marker);
-                                return $(marker);
-                        }
-
-                });
+            $.extend($.ui.gmap.prototype, {
+              // This fires after the widgets create method
+              _init: function() {
+                var self = this;
+                // If you add the property option address in the constructor it will be geocoded 
+                if ( this.options.address && this.options.callback ) {
+                  this.search({'address': this.options.address}, function(results, status) {
+                    if ( status === 'OK' ) {
+                      self._call(self.options.callback, results, status);
+                    }
+                  });
+                }
+              }
+            });
         } (jQuery) );
 
-      });
 
-     function hoge() {
-       var yourStartLatLng = new google.maps.LatLng(59.3426606750, 18.0736160278);
-       $('#map_canvas').gmap('addMarker', { 'position': yourStartLatLng, 'marker': MarkerWithLabel }, function() {});
-     }
-      //$('#map_canvas').gmap('theBeatles');
+        ( function($) {
+          $.extend($.ui.gmap.prototype, {
+            /**
+             * Autocomplete using Google Geocoder
+             * @param panel:string/node/jquery
+             * @param callback:function(ui) called whenever something is selected
+             */
+            // $('#map_canvas').gmap('autocomplete', 'locality', function(ui) { で呼ばれる
+            autocomplete: function(panel, callback) {
+      
+              // ここでいうthis は…? #=> あとでsearch を呼び出してるから、maps とおもわれる
+              var self = this;
+      
+              // $('locality').autocomplete
+              $(this._unwrap(panel)).autocomplete({
+      
+                // source の指定はfunction の結果
+                // request はどれ？, response はどれ？ #=> jQuery の仕様。request はinput に入力したテキスト。reponse はサジェストするテキスト
+                source: function( request, response ) {
+      
+                  // gmap のsearch と思われる
+                  self.search({'address':request.term}, function(results, status) {
+                    if ( status === 'OK' ) {
+      
+                      // 住所が入った配列が返る
+                      //   map は配列のメソッドのmap.
+                      response( $.map( results, function(item) {
+                        return { label: item.formatted_address, value: item.formatted_address, position: item.geometry.location }
+                      }));
+                    }
+                  });
+                },
+      
+                minLength: 3,
+      
+                // select すると、callback = function(ui) が呼ばれる
+                select: function(event, ui) { 
+                  self._call(callback, ui);
+                },
+                open: function() { $( this ).removeClass( "ui-corner-all" ).addClass( "ui-corner-top" ); },
+                close: function() { $( this ).removeClass( "ui-corner-top" ).addClass( "ui-corner-all" ); }
+              });
+            }
+          });
+        } (jQuery) );
+      });
     </script>
   </head>
   <body>
+    <input id="locality" type="text" />
+
     <div id="map_canvas" style="width:250px;height:250px"></div>
-    <button onclick="hoge();">a</button>
   </body>
 </html>
