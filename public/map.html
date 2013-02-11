@@ -17,11 +17,11 @@
     <script type="text/javascript">
       $(function() {
           var yourStartLatLng = new google.maps.LatLng(59.3426606750, 18.0736160278);
-          $('#map_canvas').gmap({'center': yourStartLatLng});
 
-          $.getJSON( 'd.json', function(data) { 
+          $.getJSON( '/d.json', function(data) { 
             $.each( data.markers, function(i, m) {
               $('#map_canvas').gmap('addMarker', { 'position': new google.maps.LatLng(m.latitude, m.longitude), 'bounds':true } );
+              setInterval(function(){ $('#map_canvas').gmap('option', 'zoom', 10) },1000);
             });
           });
       });
