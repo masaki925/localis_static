@@ -16,14 +16,21 @@
 
     <script type="text/javascript">
       $(function() {
-          var yourStartLatLng = new google.maps.LatLng(59.3426606750, 18.0736160278);
+        var arr = [];
 
-          $.getJSON( '/d.json', function(data) { 
-            $.each( data.markers, function(i, m) {
-              $('#map_canvas').gmap('addMarker', { 'position': new google.maps.LatLng(m.latitude, m.longitude), 'bounds':true } );
-            });
+        $.getJSON( '/d.json', function(data) { 
+          $.each( data.markers, function(i, m) {
+            arr.push( new google.maps.LatLng(m.latitude, m.longitude) );
           });
+        });
+
+        $('#map_canvas').gmap().bind('init', function(evt, map) { 
+          $('#map_canvas').gmap('displayDirections', { 'origin': arr.pop(), 'destination': arr.pop(), 'travelMode': google.maps.DirectionsTravelMode.TRANSIT }, { 'panel': document.getElementById('panel') }, function(result, status) {
+            console.debug(result);
+          });
+        });
       });
+
     </script>
   </head>
   <body>
