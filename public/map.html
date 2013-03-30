@@ -15,16 +15,29 @@
     <script src="http://cdn.aldu.net/google.maps.markerwithlabel/1.1.5/markerwithlabel.min.js"></script>
 
     <script type="text/javascript">
+      function set_order_button() {
+        $('.up').click(function() {
+          var parent = $(this).parent();
+          parent.insertBefore(parent.prev());
+        });
+
+        $('.down').click(function() {
+          var parent = $(this).parent();
+          parent.insertAfter(parent.next());
+        });
+      }
+
       $(function() {
         var arr = [];
 
         $.getJSON( '/d.json', function(data) { 
           $.each( data.markers, function(i, m) {
             $('#map_canvas').gmap('addMarker', { 'position': new google.maps.LatLng(m.latitude, m.longitude), 'bounds':true } );
-            console.debug( document.createTextNode(m.name) )
-            $('<li></li>').text( m.name ).appendTo('div#spots');
-            $('#spots').append( '<li>' + document.createTextNode( m.name ).wholeText + '</li>' );
+            $('<li class="spot"></li>').text( m.name ).append(
+              $('<button class="up">up</button>')    ).append( 
+              $('<button class="down">down</button>')).appendTo('div#spots');
           });
+          set_order_button();
         });
       });
 
@@ -32,6 +45,7 @@
   </head>
   <body>
     <div id="map_canvas" style="width:250px;height:250px"></div>
-    <div id="spots"></div>
+    <div id="spots">
+    </div>
   </body>
 </html>

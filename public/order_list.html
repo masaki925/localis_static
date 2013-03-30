@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title></title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript"></script>
+  <script type="text/javascript">
+    $(document).ready(function() {
+      $('.up').click(function() {
+        var parent = $(this).parent();
+        parent.insertBefore(parent.prev());
+      });
+
+      $('.down').click(function() {
+        var parent = $(this).parent();
+        parent.insertAfter(parent.next());
+      });
+    });
+  </script>
+</head>
+<body>
+  <div id="spots">
+    <li class="spot">
+      &lt;script&gt;alert(1)&lt;/script&gt;
+      <button class="up">up</button>
+      <button class="down">down</button>
+    </li>
+    <li class="spot">spotB
+    <button class="up">up</button><button class="down">down</button></li><li class="spot">spotC<button class="up">up</button><button class="down">down</button></li>
+  </div>
+
+</body>
+</html>
